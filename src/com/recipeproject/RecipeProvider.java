@@ -53,9 +53,9 @@ public class RecipeProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + RECIPES_TABLE_NAME + " ("
-                    + Recipes._ID + " INTEGER PRIMARY KEY,"
-                    + Recipes.NAME + " TEXT,"
+            db.execSQL("CREATE TABLE " + RecipeProviderMetaData.RECIPES_TABLE_NAME + " ("
+                    + RecipeProviderMetaData.RecipeTableMetaData._ID + " INTEGER PRIMARY KEY,"
+                    + RecipeProviderMetaData.RecipeTableMetaData.NAME + " TEXT,"
                     + ");");
         }
 
@@ -63,7 +63,7 @@ public class RecipeProvider extends ContentProvider {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS notes");
+            db.execSQL("DROP TABLE IF EXISTS" + RecipeProviderMetaData.RECIPES_TABLE_NAME);
             onCreate(db);
         }
     }
