@@ -76,9 +76,27 @@ public class RecipeProvider extends ContentProvider {
     }
     
 	@Override
-	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int delete(Uri uri, String where, String[] whereArgs) {
+		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+		int count;
+		switch(sUriMatcher.match(uri)) {
+		case INCOMING_RECIPE_COLLECTION_URI_INDICATOR:
+			count = db.delete(RecipeTableMetaData.TABLE_NAME, where, whereArgs);
+			break;
+			
+		case INCOMING_SINGLE_RECIPE_URI_INDICATOR:
+			String rowId = uri.getPathSegments().get(1);
+			count = db.delete(RecipeTableMetaData.TABLE_NAME, 
+					RecipeTableMetaData._ID + "=" + rowId + (!TextUtils.isEmpty(where) ? "AND (" + where + ")" : ""), 
+					whereArgs);
+			break;
+			
+		default:
+			throw new IllegalArgumentException("Unknown URI " + uri);
+		}
+		
+		getContext().getContentResolver().notifyChange(uri, null);
+		return count;
 	}
 
 	@Override
