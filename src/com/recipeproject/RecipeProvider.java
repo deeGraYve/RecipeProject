@@ -2,9 +2,6 @@ package com.recipeproject;
 
 import java.util.HashMap;
 
-import com.recipeproject.RecipeProviderMetaData;
-import com.recipeproject.RecipeProviderMetaData.RecipeTableMetaData;
-
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,8 +9,12 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
+
+import com.recipeproject.RecipeProviderMetaData.RecipeTableMetaData;
 
 public class RecipeProvider extends ContentProvider {
 
@@ -55,7 +56,7 @@ public class RecipeProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE " + RecipeProviderMetaData.RECIPES_TABLE_NAME + " ("
                     + RecipeProviderMetaData.RecipeTableMetaData._ID + " INTEGER PRIMARY KEY,"
-                    + RecipeProviderMetaData.RecipeTableMetaData.NAME + " TEXT,"
+                    + RecipeProviderMetaData.RecipeTableMetaData.RECIPE_NAME + " TEXT,"
                     + ");");
         }
 
@@ -76,8 +77,14 @@ public class RecipeProvider extends ContentProvider {
 
 	@Override
 	public String getType(Uri uri) {
-		// TODO Auto-generated method stub
-		return null;
+		switch(sUriMatcher.match(uri)) {
+		case INCOMING_RECIPE_COLLECTION_URI_INDICATOR:
+			return RecipeTableMetaData.CONTENT_TYPE;
+		case INCOMING_SINGLE_RECIPE_URI_INDICATOR:
+			return RecipeTableMetaData.CONTENT_ITEM_TYPE;
+		default:
+			throw new IllegalArgumentException("Unknown URI " + uri);
+		}
 	}
 
 	@Override
@@ -87,17 +94,41 @@ public class RecipeProvider extends ContentProvider {
 	}
 
 	@Override
-	public boolean onCreate() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Cursor query(Uri uri, String[] projection, String selection,
-			String[] selectionArgs, String sortOrder) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+		
+		switch(sUriMatcher.match(uri)) {
+		case INCOMING_RECIPE_COLLECTION_URI_INDICATOR:
+			qb.setTables(RecipeTableMetaData.TABLE_NAME);
+			qb.setProjectionMap(sRecipesProjectionMap);
+			break;
+		
+		case INCOMING_SINGLE_RECIPE_URI_INDICATOR:
+			qb.setTables(RecipeTableMetaData.TABLE_NAME);
+			qb.setProjectionMap(sRecipesProjectionMap);
+			qb.appendWhere(RecipeTableMetaData._ID + "=" + uri.getPathSegments().get(1));
+			break;
+		
+		default:
+			throw new IllegalArgumentException("Unknown URI " + uri);
+		}
+		
+		String orderBy;
+		if (TextUtils.isEmpty(sortOrder)) {
+			orderBy = RecipeTableMetaData.DEFAULT_SORT_ORDER;
+		} else {
+			orderBy = sortOrder;
+		}
+		
+		//Get the database and run the query
+		SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, orderBy);
+		int i = c.getCount();
+		
+		//Tell the cursor what uri to watch , so it knows when its source data changes
+		c.setNotificationUri(getContext().getContentResolver(), uri);
+		return c;
+}
 
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
