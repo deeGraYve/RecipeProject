@@ -3,10 +3,12 @@ package com.recipeproject;
 import java.util.HashMap;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -26,6 +28,8 @@ public class RecipeProvider extends ContentProvider {
     	sRecipesProjectionMap = new HashMap<String, String>();
     	sRecipesProjectionMap.put(RecipeTableMetaData._ID, RecipeTableMetaData._ID);
     	sRecipesProjectionMap.put(RecipeTableMetaData.RECIPE_NAME, RecipeTableMetaData.RECIPE_NAME);
+    	sRecipesProjectionMap.put(RecipeTableMetaData.CREATED_DATE, RecipeTableMetaData.CREATED_DATE);
+    	sRecipesProjectionMap.put(RecipeTableMetaData.MODIFIED_DATE, RecipeTableMetaData.MODIFIED_DATE);
     }
 
     private static final UriMatcher sUriMatcher;
@@ -57,6 +61,8 @@ public class RecipeProvider extends ContentProvider {
             db.execSQL("CREATE TABLE " + RecipeProviderMetaData.RECIPES_TABLE_NAME + " ("
                     + RecipeProviderMetaData.RecipeTableMetaData._ID + " INTEGER PRIMARY KEY,"
                     + RecipeProviderMetaData.RecipeTableMetaData.RECIPE_NAME + " TEXT,"
+                    + RecipeProviderMetaData.RecipeTableMetaData.CREATED_DATE + " INTEGER,"
+                    + RecipeProviderMetaData.RecipeTableMetaData.MODIFIED_DATE + " INTEGER"
                     + ");");
         }
 
@@ -89,8 +95,37 @@ public class RecipeProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		// TODO Auto-generated method stub
-		return null;
+		//Validate the requested uri
+		if (sUriMatcher.match(uri) != INCOMING_RECIPE_COLLECTION_URI_INDICATOR) {
+			throw new IllegalArgumentException("Unknown URI " + uri);
+		}
+		
+		Long now = Long.valueOf(System.currentTimeMillis());
+		
+		//validate input fields
+		//Make sure that the fields are all set
+		if (values.containsKey(RecipeTableMetaData.CREATED_DATE) == false) {
+			values.put(RecipeTableMetaData.CREATED_DATE, now);
+		}
+		
+		if (values.containsKey(RecipeTableMetaData.MODIFIED_DATE) == false) {
+			values.put(RecipeTableMetaData.MODIFIED_DATE, now);
+		}
+		
+		if (values.containsKey(RecipeTableMetaData.RECIPE_NAME) == false) {
+			throw new SQLException("Failed to insert row because Recipe Name is needed " + uri);
+		}
+		
+		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+		long rowId = db.insert(RecipeTableMetaData.TABLE_NAME, RecipeTableMetaData.RECIPE_NAME, values);
+		
+		if (rowId > 0) {
+			Uri insertedRecipeUri = ContentUris.withAppendedId(RecipeTableMetaData.CONTENT_URI, rowId);
+			getContext().getContentResolver().notifyChange(insertedRecipeUri, null);
+			return insertedRecipeUri;
+		}
+		
+		throw new SQLException("Failed to insert row into " + uri);
 	}
 
 	@Override

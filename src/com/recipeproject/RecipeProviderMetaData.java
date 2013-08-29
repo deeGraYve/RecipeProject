@@ -24,5 +24,7 @@ public class RecipeProviderMetaData
     	public static final String DEFAULT_SORT_ORDER = "modified DESC";
     	
     	public static final String RECIPE_NAME = "name";
+    	public static final String CREATED_DATE = "created";
+    	public static final String MODIFIED_DATE = "modified";
     }
 }
