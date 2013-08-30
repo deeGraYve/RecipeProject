@@ -13,8 +13,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <provider android:name = "RecipesProvider"
-            android:authorities = "com.androidbook.provider.RecipeProvider"
+        <provider android:name = "RecipeProvider"
+            android:authorities = ".RecipeProvider"
         />
         <activity
             android:name="com.recipeproject.MainActivity"
