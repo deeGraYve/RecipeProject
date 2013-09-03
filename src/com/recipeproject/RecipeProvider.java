@@ -58,12 +58,20 @@ public class RecipeProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + RecipeProviderMetaData.RECIPES_TABLE_NAME + " ("
-                    + RecipeProviderMetaData.RecipeTableMetaData._ID + " INTEGER PRIMARY KEY,"
-                    + RecipeProviderMetaData.RecipeTableMetaData.RECIPE_NAME + " TEXT,"
-                    + RecipeProviderMetaData.RecipeTableMetaData.CREATED_DATE + " INTEGER,"
-                    + RecipeProviderMetaData.RecipeTableMetaData.MODIFIED_DATE + " INTEGER"
-                    + ");");
+            db.execSQL(
+            		"CREATE TABLE " + RecipeProviderMetaData.RECIPES_TABLE_NAME + " ("
+            				+ RecipeProviderMetaData.RecipeTableMetaData._ID + " INTEGER PRIMARY KEY,"
+            				+ RecipeProviderMetaData.RecipeTableMetaData.RECIPE_NAME + " TEXT,"
+            				+ RecipeProviderMetaData.RecipeTableMetaData.CREATED_DATE + " INTEGER,"
+            				+ RecipeProviderMetaData.RecipeTableMetaData.MODIFIED_DATE + " INTEGER"
+                    + ");"
+            );
+            
+            ContentValues myValues = new ContentValues();
+            
+            myValues.put(RecipeProviderMetaData.RecipeTableMetaData.RECIPE_NAME, "Brownies");
+            
+            db.insert(RecipeProviderMetaData.RECIPES_TABLE_NAME, "", myValues);
         }
 
         @Override

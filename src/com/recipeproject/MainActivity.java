@@ -1,10 +1,14 @@
 package com.recipeproject;
 
+import android.R.string;
 import android.os.Bundle;
 import android.app.Activity;
+import android.database.Cursor;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.recipeproject.RecipeProviderMetaData.RecipeTableMetaData;;
 
 public class MainActivity extends Activity {
 
@@ -31,6 +35,14 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		
+		String[] projection = new String[]{
+				RecipeProviderMetaData.RecipeTableMetaData._ID,
+				RecipeProviderMetaData.RecipeTableMetaData.RECIPE_NAME
+		};
+		
+		Cursor cursor = getContentResolver().query(RecipeProviderMetaData.RecipeTableMetaData.CONTENT_URI, projection, null, null, null);
+		
 		createNameContainer();
 		createAddressContainer();
 		createParentContainer();
