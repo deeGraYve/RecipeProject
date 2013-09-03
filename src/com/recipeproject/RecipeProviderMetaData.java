@@ -5,7 +5,7 @@ import android.provider.BaseColumns;
 
 public class RecipeProviderMetaData
 {
-	public static final String AUTHORITY = "com.androidbook.provider.RecipeProvider";
+	public static final String AUTHORITY = "com.recipeproject";
 	
 	public static final String DATABASE_NAME = "recipes.db";
 	public static final int DATABASE_VERSION = 2;
