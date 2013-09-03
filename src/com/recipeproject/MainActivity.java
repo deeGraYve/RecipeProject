@@ -35,14 +35,7 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		
-		String[] projection = new String[]{
-				RecipeProviderMetaData.RecipeTableMetaData._ID,
-				RecipeProviderMetaData.RecipeTableMetaData.RECIPE_NAME
-		};
-		
-		Cursor cursor = getContentResolver().query(RecipeProviderMetaData.RecipeTableMetaData.CONTENT_URI, projection, null, null, null);
-		
+
 		createNameContainer();
 		createAddressContainer();
 		createParentContainer();
